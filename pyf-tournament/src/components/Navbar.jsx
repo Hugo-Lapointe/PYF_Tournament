@@ -60,7 +60,7 @@ export default function Navbar() {
                 isActive ? activeClass : "text-gray-700 hover:text-blue-600"
               }
             >
-              Standings
+              Tournaments
             </NavLink>
 
             {/* Conditionally show Admin or Dashboard */}

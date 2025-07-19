@@ -6,7 +6,7 @@ export default function Apply() {
       <h1 className="text-3xl font-bold mb-6 text-center">Apply for the Tournament</h1>
       <div className="aspect-[4/3]">
         <iframe
-          src="https://docs.google.com/forms/d/e/YOUR_FORM_ID/viewform?embedded=true"
+          src="https://docs.google.com/forms/d/e/1FAIpQLScupKcmelkyBiQQCKNFV0gDfyA0Ebv0SxtmvGHjXK88AQS9yw/viewform"
           width="100%"
           height="700"
           frameBorder="0"

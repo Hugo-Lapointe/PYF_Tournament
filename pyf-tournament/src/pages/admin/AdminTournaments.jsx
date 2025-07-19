@@ -10,6 +10,8 @@ import {
   updateDoc,
 } from "firebase/firestore";
 
+import { generateFirstRoundMatches } from "../../utils/generateFirstRoundMatches";
+
 export default function AdminTournaments() {
   const [teams, setTeams] = useState([]);
   const [players, setPlayers] = useState([]);
@@ -20,6 +22,7 @@ export default function AdminTournaments() {
 
   // Editing state
   const [editingId, setEditingId] = useState(null);
+  const [completed, setCompleted] = useState(false);
 
   // Fetch teams and players
   useEffect(() => {
@@ -55,17 +58,22 @@ export default function AdminTournaments() {
     const teamIds = selectedTeams.map((t) => t.value);
 
     if (editingId) {
+      // Updating existing tournament
       await updateDoc(doc(db, "tournaments", editingId), {
         name: tournamentName,
         teams: teamIds,
       });
       setEditingId(null);
     } else {
+      // Creating new tournament with first round matches generated from utils
+      const firstRoundMatches = generateFirstRoundMatches(teamIds);
+
       await addDoc(collection(db, "tournaments"), {
         name: tournamentName,
         teams: teamIds,
-        matches: [],
+        matches: firstRoundMatches,
         standings: [],
+        completed: false,
         createdAt: new Date(),
       });
     }
@@ -96,6 +104,7 @@ export default function AdminTournaments() {
   const startEditing = (tourney) => {
     setEditingId(tourney.id);
     setTournamentName(tourney.name);
+    setCompleted(tourney.completed ?? false);
 
     const selected = tourney.teams
       .map((tid) => {
@@ -130,7 +139,9 @@ export default function AdminTournaments() {
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
-      <h2 className="text-2xl mb-4">{editingId ? "Edit Tournament" : "Create Tournament"}</h2>
+      <h2 className="text-2xl mb-4">
+        {editingId ? "Edit Tournament" : "Create Tournament"}
+      </h2>
       <form onSubmit={handleSubmit} className="space-y-4 mb-6">
         <input
           className="border p-2 rounded w-full"
@@ -149,7 +160,9 @@ export default function AdminTournaments() {
           <button
             type="submit"
             className={`px-4 py-2 rounded text-white ${
-              editingId ? "bg-yellow-600 hover:bg-yellow-700" : "bg-purple-600 hover:bg-purple-700"
+              editingId
+                ? "bg-yellow-600 hover:bg-yellow-700"
+                : "bg-purple-600 hover:bg-purple-700"
             }`}
           >
             {editingId ? "Save Changes" : "Create Tournament"}
