@@ -14,7 +14,7 @@ import AdminTeams from "./pages/admin/AdminTeams";
 import AdminTournaments from "./pages/admin/AdminTournaments";
 import AdminMatches from "./pages/admin/AdminMatches";
 
-import ProtectedRoute from "./components/ProtectedRoute";
+import ProtectedRoutes from "./components/ProtectedRoutes";
 
 function App() {
   return (
@@ -33,41 +33,41 @@ function App() {
         <Route
           path="/admin"
           element={
-            <ProtectedRoute>
+            <ProtectedRoutes>
               <AdminDashboard />
-            </ProtectedRoute>
+            </ProtectedRoutes>
           }
         />
         <Route
           path="/admin/players"
           element={
-            <ProtectedRoute>
+            <ProtectedRoutes>
               <AdminPlayers />
-            </ProtectedRoute>
+            </ProtectedRoutes>
           }
         />
         <Route
           path="/admin/teams"
           element={
-            <ProtectedRoute>
+            <ProtectedRoutes>
               <AdminTeams />
-            </ProtectedRoute>
+            </ProtectedRoutes>
           }
         />
         <Route
           path="/admin/tournaments"
           element={
-            <ProtectedRoute>
+            <ProtectedRoutes>
               <AdminTournaments />
-            </ProtectedRoute>
+            </ProtectedRoutes>
           }
         />
         <Route
           path="/admin/matches"
           element={
-            <ProtectedRoute>
+            <ProtectedRoutes>
               <AdminMatches />
-            </ProtectedRoute>
+            </ProtectedRoutes>
           }
         />
       </Routes>

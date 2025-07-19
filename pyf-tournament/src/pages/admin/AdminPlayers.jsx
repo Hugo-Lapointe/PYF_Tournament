@@ -6,13 +6,16 @@ import {
   getDocs,
   deleteDoc,
   doc,
+  updateDoc,
 } from "firebase/firestore";
 
 export default function AdminPlayers() {
   const [players, setPlayers] = useState([]);
   const [playerName, setPlayerName] = useState("");
+  const [editingId, setEditingId] = useState(null);
+  const [editingName, setEditingName] = useState("");
 
-  // Fetch players from Firestore
+  // Fetch players
   const fetchPlayers = async () => {
     const snapshot = await getDocs(collection(db, "players"));
     setPlayers(snapshot.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
@@ -33,6 +36,21 @@ export default function AdminPlayers() {
     fetchPlayers();
   };
 
+  // Start editing
+  const startEditing = (player) => {
+    setEditingId(player.id);
+    setEditingName(player.name);
+  };
+
+  // Save edit
+  const saveEdit = async () => {
+    if (!editingName.trim()) return;
+    await updateDoc(doc(db, "players", editingId), { name: editingName });
+    setEditingId(null);
+    setEditingName("");
+    fetchPlayers();
+  };
+
   useEffect(() => {
     fetchPlayers();
   }, []);
@@ -40,6 +58,8 @@ export default function AdminPlayers() {
   return (
     <div className="p-6 max-w-3xl mx-auto">
       <h2 className="text-2xl mb-4">Manage Players</h2>
+
+      {/* Add Form */}
       <form onSubmit={addPlayer} className="mb-6">
         <input
           type="text"
@@ -56,19 +76,55 @@ export default function AdminPlayers() {
         </button>
       </form>
 
+      {/* Players List */}
       <ul className="space-y-2">
         {players.map((player) => (
           <li
             key={player.id}
             className="flex justify-between items-center border p-2 rounded"
           >
-            <span>{player.name}</span>
-            <button
-              onClick={() => deletePlayer(player.id)}
-              className="text-red-600 hover:text-red-800"
-            >
-              Delete
-            </button>
+            {editingId === player.id ? (
+              <>
+                <input
+                  type="text"
+                  value={editingName}
+                  onChange={(e) => setEditingName(e.target.value)}
+                  className="border p-1 mr-2 rounded w-full"
+                />
+                <div className="space-x-2">
+                  <button
+                    onClick={saveEdit}
+                    className="text-green-600 hover:text-green-800"
+                  >
+                    Save
+                  </button>
+                  <button
+                    onClick={() => setEditingId(null)}
+                    className="text-gray-600 hover:text-gray-800"
+                  >
+                    Cancel
+                  </button>
+                </div>
+              </>
+            ) : (
+              <>
+                <span>{player.name}</span>
+                <div className="space-x-2">
+                  <button
+                    onClick={() => startEditing(player)}
+                    className="text-blue-600 hover:text-blue-800"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => deletePlayer(player.id)}
+                    className="text-red-600 hover:text-red-800"
+                  >
+                    Delete
+                  </button>
+                </div>
+              </>
+            )}
           </li>
         ))}
       </ul>
