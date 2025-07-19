@@ -1,6 +1,8 @@
 import React from "react";
 import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
 
+import Navbar from "./components/Navbar";
+
 import Landing from "./pages/Landing";
 import Apply from "./pages/Apply";
 import Players from "./pages/Players";
@@ -19,6 +21,7 @@ import ProtectedRoutes from "./components/ProtectedRoutes";
 function App() {
   return (
     <Router>
+       <Navbar />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Landing />} />
