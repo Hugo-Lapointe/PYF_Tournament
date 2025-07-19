@@ -1,35 +1,78 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React from "react";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+
+import Landing from "./pages/Landing";
+import Apply from "./pages/Apply";
+import Players from "./pages/Players";
+import Standings from "./pages/Standings";
+
+import AdminLogin from "./pages/AdminLogin";
+
+import AdminDashboard from "./pages/admin/AdminDashboard";
+import AdminPlayers from "./pages/admin/AdminPlayers";
+import AdminTeams from "./pages/admin/AdminTeams";
+import AdminTournaments from "./pages/admin/AdminTournaments";
+import AdminMatches from "./pages/admin/AdminMatches";
+
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Router>
+      <Routes>
+        {/* Public routes */}
+        <Route path="/" element={<Landing />} />
+        <Route path="/apply" element={<Apply />} />
+        <Route path="/players" element={<Players />} />
+        <Route path="/standings" element={<Standings />} />
+
+        {/* Admin login */}
+        <Route path="/admin-login" element={<AdminLogin />} />
+
+        {/* Protected Admin Routes */}
+        <Route
+          path="/admin"
+          element={
+            <ProtectedRoute>
+              <AdminDashboard />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/players"
+          element={
+            <ProtectedRoute>
+              <AdminPlayers />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/teams"
+          element={
+            <ProtectedRoute>
+              <AdminTeams />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/tournaments"
+          element={
+            <ProtectedRoute>
+              <AdminTournaments />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/admin/matches"
+          element={
+            <ProtectedRoute>
+              <AdminMatches />
+            </ProtectedRoute>
+          }
+        />
+      </Routes>
+    </Router>
+  );
 }
 
-export default App
+export default App;
