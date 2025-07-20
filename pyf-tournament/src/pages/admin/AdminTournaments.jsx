@@ -5,9 +5,9 @@ import {
   collection,
   addDoc,
   getDocs,
-  deleteDoc,
   doc,
   updateDoc,
+  deleteDoc,
 } from "firebase/firestore";
 
 export default function AdminTournaments() {
@@ -17,27 +17,22 @@ export default function AdminTournaments() {
 
   const [tournamentName, setTournamentName] = useState("");
   const [selectedTeams, setSelectedTeams] = useState([]);
-
-  // Editing state
+  const [completed, setCompleted] = useState(false);
   const [editingId, setEditingId] = useState(null);
 
-  // Fetch teams and players
   useEffect(() => {
     const fetchTeams = async () => {
       const snap = await getDocs(collection(db, "teams"));
       setTeams(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     };
-
     const fetchPlayers = async () => {
       const snap = await getDocs(collection(db, "players"));
       setPlayers(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
     };
-
     fetchTeams();
     fetchPlayers();
   }, []);
 
-  // Fetch tournaments
   const fetchTournaments = async () => {
     const snap = await getDocs(collection(db, "tournaments"));
     setTournaments(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
@@ -47,7 +42,8 @@ export default function AdminTournaments() {
     fetchTournaments();
   }, []);
 
-  // Create or update tournament
+  // --- handle submit ---
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!tournamentName.trim() || selectedTeams.length === 0) return;
@@ -55,47 +51,56 @@ export default function AdminTournaments() {
     const teamIds = selectedTeams.map((t) => t.value);
 
     if (editingId) {
+      // Update existing tournament
       await updateDoc(doc(db, "tournaments", editingId), {
         name: tournamentName,
         teams: teamIds,
+        completed,
       });
       setEditingId(null);
     } else {
+      // Create new tournament
       await addDoc(collection(db, "tournaments"), {
         name: tournamentName,
         teams: teamIds,
-        matches: [],
+        completed,
         standings: [],
         createdAt: new Date(),
       });
     }
 
+    // Reset form
     setTournamentName("");
     setSelectedTeams([]);
+    setCompleted(false);
     fetchTournaments();
   };
 
-  // Delete tournament
   const deleteTournament = async (id) => {
     if (
       window.confirm(
         "Are you sure you want to delete this tournament? This action cannot be undone."
       )
     ) {
-      await deleteDoc(doc(db, "tournaments", id));
-      if (editingId === id) {
-        setEditingId(null);
-        setTournamentName("");
-        setSelectedTeams([]);
+      try {
+        await deleteDoc(doc(db, "tournaments", id));
+        fetchTournaments();
+        if (editingId === id) {
+          setEditingId(null);
+          setTournamentName("");
+          setSelectedTeams([]);
+          setCompleted(false);
+        }
+      } catch (error) {
+        alert("Erreur lors de la suppression : " + error.message);
       }
-      fetchTournaments();
     }
   };
 
-  // Start editing a tournament
   const startEditing = (tourney) => {
     setEditingId(tourney.id);
     setTournamentName(tourney.name);
+    setCompleted(tourney.completed ?? false);
 
     const selected = tourney.teams
       .map((tid) => {
@@ -107,11 +112,11 @@ export default function AdminTournaments() {
     setSelectedTeams(selected);
   };
 
-  // Cancel editing
   const cancelEditing = () => {
     setEditingId(null);
     setTournamentName("");
     setSelectedTeams([]);
+    setCompleted(false);
   };
 
   const teamOptions = teams.map((t) => ({
@@ -119,7 +124,6 @@ export default function AdminTournaments() {
     label: t.name,
   }));
 
-  // Helper: get player names for a team
   const getPlayerNames = (team) => {
     if (!team?.players?.length) return "No players";
     return team.players
@@ -131,6 +135,7 @@ export default function AdminTournaments() {
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h2 className="text-2xl mb-4">{editingId ? "Edit Tournament" : "Create Tournament"}</h2>
+
       <form onSubmit={handleSubmit} className="space-y-4 mb-6">
         <input
           className="border p-2 rounded w-full"
@@ -138,6 +143,7 @@ export default function AdminTournaments() {
           value={tournamentName}
           onChange={(e) => setTournamentName(e.target.value)}
         />
+
         <Select
           isMulti
           options={teamOptions}
@@ -145,11 +151,23 @@ export default function AdminTournaments() {
           onChange={setSelectedTeams}
           placeholder="Select Teams"
         />
+
+        <label className="flex items-center space-x-2">
+          <input
+            type="checkbox"
+            checked={completed}
+            onChange={(e) => setCompleted(e.target.checked)}
+          />
+          <span>Tournament Completed</span>
+        </label>
+
         <div className="space-x-4">
           <button
             type="submit"
             className={`px-4 py-2 rounded text-white ${
-              editingId ? "bg-yellow-600 hover:bg-yellow-700" : "bg-purple-600 hover:bg-purple-700"
+              editingId
+                ? "bg-yellow-600 hover:bg-yellow-700"
+                : "bg-purple-600 hover:bg-purple-700"
             }`}
           >
             {editingId ? "Save Changes" : "Create Tournament"}
@@ -175,6 +193,11 @@ export default function AdminTournaments() {
           >
             <div className="mb-3 md:mb-0">
               <strong>{tourney.name}</strong>
+
+              <p className={`text-sm mt-1 ${tourney.completed ? "text-green-600" : "text-gray-500"}`}>
+                Status: {tourney.completed ? "✅ Completed" : "⌛ In Progress"}
+              </p>
+
               <div className="mt-1 text-sm text-gray-600">
                 Teams:
                 <ul className="list-disc list-inside ml-4">
@@ -183,7 +206,7 @@ export default function AdminTournaments() {
                     if (!team) return null;
                     return (
                       <li key={tid}>
-                        <span>{team.name}</span> -{" "}
+                        <span>{team.name}</span> –{" "}
                         <em className="text-gray-500">{getPlayerNames(team)}</em>
                       </li>
                     );

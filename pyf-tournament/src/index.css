@@ -1,3 +1,13 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+
+:root {
+    color: white;
+    background-color: hsl(222 47% 4%);
+}
+
+a {
+  color: white;
+}

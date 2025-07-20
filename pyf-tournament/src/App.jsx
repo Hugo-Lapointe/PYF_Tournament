@@ -15,10 +15,12 @@ import AdminTournaments from "./pages/admin/AdminTournaments";
 import AdminMatches from "./pages/admin/AdminMatches";
 
 import ProtectedRoutes from "./components/ProtectedRoutes";
+import Navbar from "./components/Navbar";
 
 function App() {
   return (
     <Router>
+      <Navbar />
       <Routes>
         {/* Public routes */}
         <Route path="/" element={<Landing />} />
