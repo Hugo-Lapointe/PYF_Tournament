@@ -7,6 +7,7 @@ import Apply from "./pages/Apply";
 import Teams from "./pages/Teams";
 import Players from "./pages/Players";
 import Standings from "./pages/Standings";
+import Rules from "./pages/Rules";
 
 import AdminLogin from "./pages/AdminLogin";
 import AdminDashboard from "./pages/admin/AdminDashboard";
@@ -17,6 +18,8 @@ import AdminMatches from "./pages/admin/AdminMatches";
 
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import Navbar from "./components/Navbar";
+import Footer from "./components/Footer";
+import ScrollToTop from "./components/ScrollToTop";
 
 function AnimatedRoutes() {
   const location = useLocation();
@@ -30,6 +33,7 @@ function AnimatedRoutes() {
         <Route path="/teams" element={<Teams />} />
         <Route path="/players" element={<Players />} />
         <Route path="/standings" element={<Standings />} />
+        <Route path="/rules" element={<Rules />} />
 
         {/* Admin login */}
         <Route path="/admin-login" element={<AdminLogin />} />
@@ -84,8 +88,10 @@ function App() {
   return (
     <div className="min-h-screen bg-slate-900 text-white">
       <Router>
+        <ScrollToTop />
         <Navbar />
         <AnimatedRoutes />
+        <Footer />
       </Router>
     </div>
   );

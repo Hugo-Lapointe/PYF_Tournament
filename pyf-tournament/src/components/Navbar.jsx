@@ -75,7 +75,7 @@ const Navbar = () => {
   );
 
   return (
-    <nav className="relative z-[60]">
+    <nav className="sticky top-0 z-[60] bg-slate-900">
       <div className="h-10vh flex justify-between items-center text-white lg:py-5 px-6 sm:px-12 py-4">
         {/* Logo */}
         <div className="flex items-center flex-1">
