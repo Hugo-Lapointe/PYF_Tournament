@@ -19,11 +19,11 @@ export default function AdminLogin() {
   };
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-screen p-6 bg-gray-100">
+    <div className="flex flex-col items-center justify-center min-h-screen p-6">
       <h1 className="text-3xl font-bold mb-6">Admin Login</h1>
       <form
         onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-full max-w-sm"
+        className="bg-slate-800 p-6 rounded shadow-md w-full max-w-sm"
       >
         <input
           type="email"

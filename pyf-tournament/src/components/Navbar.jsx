@@ -91,19 +91,19 @@ const Navbar = () => {
         <div className="hidden md:flex flex-1 items-center justify-end font-normal">
           <ul className="flex gap-8 mr-4 text-[18px]">
             <Link to="/">
-              <li className="hover:text-[#01D6FF] transition-colors duration-300">Landing</li>
+              <li className="hover:text-[#017bbd] transition-colors duration-300">Landing</li>
             </Link>
             <Link to="/apply">
-              <li className="hover:text-[#01D6FF] transition-colors duration-300">Apply</li>
+              <li className="hover:text-[#017bbd] transition-colors duration-300">Apply</li>
             </Link>
             <Link to="/teams">
-              <li className="hover:text-[#01D6FF] transition-colors duration-300">Teams</li>
+              <li className="hover:text-[#017bbd] transition-colors duration-300">Teams</li>
             </Link>
             <Link to="/players">
-              <li className="hover:text-[#01D6FF] transition-colors duration-300">Players</li>
+              <li className="hover:text-[#017bbd] transition-colors duration-300">Players</li>
             </Link>
             <Link to="/standings">
-              <li className="hover:text-[#01D6FF] transition-colors duration-300">Tournaments</li>
+              <li className="hover:text-[#017bbd] transition-colors duration-300">Tournaments</li>
             </Link>
             {/* {user && <li><LogoutButton /></li>} */}
           </ul>
