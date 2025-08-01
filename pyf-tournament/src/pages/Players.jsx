@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { db } from "../firebase";
 import { collection, getDocs } from "firebase/firestore";
+import { motion } from "framer-motion";
 
 export default function Players() {
   const [players, setPlayers] = useState([]);
@@ -30,7 +31,13 @@ export default function Players() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6">
+    <motion.div
+      initial={{ opacity: 0, y: 30 }}
+      animate={{ opacity: 1, y: 0 }}
+      exit={{ opacity: 0, y: -20 }}
+      transition={{ duration: 0.3 }}
+      className="max-w-4xl mx-auto p-6"
+    >
       <h1 className="text-3xl font-bold mb-6 text-center">Players</h1>
       {players.length === 0 ? (
         <p className="text-center text-gray-600">No players found.</p>
@@ -47,6 +54,6 @@ export default function Players() {
           ))}
         </ul>
       )}
-    </div>
+    </motion.div>
   );
 }

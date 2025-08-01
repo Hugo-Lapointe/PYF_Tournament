@@ -1,13 +1,14 @@
 import React from "react";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, useLocation } from "react-router-dom";
+import { AnimatePresence } from "framer-motion";
 
 import Landing from "./pages/Landing";
 import Apply from "./pages/Apply";
+import Teams from "./pages/Teams";
 import Players from "./pages/Players";
 import Standings from "./pages/Standings";
 
 import AdminLogin from "./pages/AdminLogin";
-
 import AdminDashboard from "./pages/admin/AdminDashboard";
 import AdminPlayers from "./pages/admin/AdminPlayers";
 import AdminTeams from "./pages/admin/AdminTeams";
@@ -17,14 +18,16 @@ import AdminMatches from "./pages/admin/AdminMatches";
 import ProtectedRoutes from "./components/ProtectedRoutes";
 import Navbar from "./components/Navbar";
 
-function App() {
+function AnimatedRoutes() {
+  const location = useLocation();
+
   return (
-    <Router>
-      <Navbar />
-      <Routes>
+    <AnimatePresence mode="wait">
+      <Routes location={location} key={location.pathname}>
         {/* Public routes */}
         <Route path="/" element={<Landing />} />
         <Route path="/apply" element={<Apply />} />
+        <Route path="/teams" element={<Teams />} />
         <Route path="/players" element={<Players />} />
         <Route path="/standings" element={<Standings />} />
 
@@ -73,7 +76,18 @@ function App() {
           }
         />
       </Routes>
-    </Router>
+    </AnimatePresence>
+  );
+}
+
+function App() {
+  return (
+    <div className="min-h-screen bg-slate-900 text-white">
+      <Router>
+        <Navbar />
+        <AnimatedRoutes />
+      </Router>
+    </div>
   );
 }
 
