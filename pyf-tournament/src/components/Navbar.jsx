@@ -76,14 +76,15 @@ const Navbar = () => {
 
   return (
     <nav className="sticky top-0 z-[60] bg-slate-900">
-      <div className="h-10vh flex justify-between items-center text-white lg:py-5 px-6 sm:px-12 py-4">
+      <div className="h-10vh flex justify-between items-center text-white px-6 lg:py-5 sm:px-12 py-4">
         {/* Logo */}
         <div className="flex items-center flex-1">
-          <Link
-            to="/"
-            className="text-3xl font-bold hover:text-[#01D6FF] transition-colors duration-300"
-          >
-            PYF Esports
+          <Link to="/" className="flex items-center">
+            <img
+              src="/images/Logo_full_transp.png"
+              alt="PYF Esports Logo"
+              className="h-10 w-auto md:h-15 transition-transform duration-300 hover:scale-105"
+            />
           </Link>
         </div>
 
@@ -91,19 +92,19 @@ const Navbar = () => {
         <div className="hidden md:flex flex-1 items-center justify-end font-normal">
           <ul className="flex gap-8 mr-4 text-[18px]">
             <Link to="/">
-              <li className="hover:text-[#017bbd] transition-colors duration-300">Landing</li>
+              <li className="hover:text-[#01D6FF] transition-colors duration-300">Landing</li>
             </Link>
             <Link to="/apply">
-              <li className="hover:text-[#017bbd] transition-colors duration-300">Apply</li>
+              <li className="hover:text-[#01D6FF] transition-colors duration-300">Apply</li>
             </Link>
             <Link to="/teams">
-              <li className="hover:text-[#017bbd] transition-colors duration-300">Teams</li>
+              <li className="hover:text-[#01D6FF] transition-colors duration-300">Teams</li>
             </Link>
             <Link to="/players">
-              <li className="hover:text-[#017bbd] transition-colors duration-300">Players</li>
+              <li className="hover:text-[#01D6FF] transition-colors duration-300">Players</li>
             </Link>
             <Link to="/standings">
-              <li className="hover:text-[#017bbd] transition-colors duration-300">Tournaments</li>
+              <li className="hover:text-[#01D6FF] transition-colors duration-300">Tournaments</li>
             </Link>
             {/* {user && <li><LogoutButton /></li>} */}
           </ul>
