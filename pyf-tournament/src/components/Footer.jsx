@@ -20,19 +20,19 @@ export default function Footer() {
 
         {/* Right side: Navigation links */}
         <nav className="flex flex-wrap gap-4 text-sm md:text-base">
-          <Link to="/apply" className="hover:text-[#01D6FF] transition-colors duration-300">
+          <Link to="/apply" className="hover:text-[#017bbd] transition-colors duration-300">
             Apply
           </Link>
-          <Link to="/teams" className="hover:text-[#01D6FF] transition-colors duration-300">
+          <Link to="/teams" className="hover:text-[#017bbd] transition-colors duration-300">
             Teams
           </Link>
-          <Link to="/players" className="hover:text-[#01D6FF] transition-colors duration-300">
+          <Link to="/players" className="hover:text-[#017bbd] transition-colors duration-300">
             Players
           </Link>
-          <Link to="/standings" className="hover:text-[#01D6FF] transition-colors duration-300">
+          <Link to="/standings" className="hover:text-[#017bbd] transition-colors duration-300">
             Tournaments
           </Link>
-          <Link to="/rules" className="hover:text-[#01D6FF] transition-colors duration-300">
+          <Link to="/rules" className="hover:text-[#017bbd] transition-colors duration-300">
             Rules
           </Link>
         </nav>
