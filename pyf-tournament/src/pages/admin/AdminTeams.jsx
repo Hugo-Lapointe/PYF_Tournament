@@ -1,182 +1,224 @@
 import React, { useEffect, useState } from "react";
-import Select from "react-select";
-import { db } from "../../firebase";
 import {
   collection,
-  addDoc,
   getDocs,
-  deleteDoc,
-  doc,
+  addDoc,
   updateDoc,
+  doc,
+  deleteDoc,
 } from "firebase/firestore";
+import { db } from "../../firebase";
 
 export default function AdminTeams() {
-  const [players, setPlayers] = useState([]);
   const [teams, setTeams] = useState([]);
+  const [players, setPlayers] = useState([]);
+  const [playersMap, setPlayersMap] = useState({});
+  const [showModal, setShowModal] = useState(false);
   const [teamName, setTeamName] = useState("");
-  const [selectedPlayers, setSelectedPlayers] = useState([]);
+  const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
+  const [playerSearch, setPlayerSearch] = useState(""); // <-- Search state
 
-  // For editing
-  const [editingId, setEditingId] = useState(null);
-
-  // Fetch players on mount
   useEffect(() => {
-    const fetchPlayers = async () => {
-      const snap = await getDocs(collection(db, "players"));
-      setPlayers(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
+    fetchData();
+  }, []);
+
+  const fetchData = async () => {
+    const teamSnapshot = await getDocs(collection(db, "teams"));
+    const fetchedTeams = teamSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setTeams(fetchedTeams);
+
+    const playerSnapshot = await getDocs(collection(db, "players"));
+    const fetchedPlayers = playerSnapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    setPlayers(fetchedPlayers);
+
+    const map = {};
+    fetchedPlayers.forEach((p) => (map[p.id] = p));
+    setPlayersMap(map);
+  };
+
+  const handleDeleteTeam = async (teamId) => {
+    await deleteDoc(doc(db, "teams", teamId));
+    setTeams((prev) => prev.filter((team) => team.id !== teamId));
+  };
+
+  const handleCreateTeam = async () => {
+    if (!teamName.trim()) return;
+
+    const teamData = {
+      name: teamName.trim(),
+      players: selectedPlayerIds,
     };
-    fetchPlayers();
-  }, []);
 
-  // Fetch teams on mount and after updates
-  const fetchTeams = async () => {
-    const snap = await getDocs(collection(db, "teams"));
-    setTeams(snap.docs.map((doc) => ({ id: doc.id, ...doc.data() })));
-  };
+    const newTeamRef = await addDoc(collection(db, "teams"), teamData);
 
-  useEffect(() => {
-    fetchTeams();
-  }, []);
-
-  // Add or Update team
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    if (!teamName.trim() || selectedPlayers.length === 0) return;
-
-    const playerIds = selectedPlayers.map((p) => p.value);
-
-    if (editingId) {
-      // Update existing team
-      await updateDoc(doc(db, "teams", editingId), {
-        name: teamName,
-        players: playerIds,
-      });
-      setEditingId(null);
-    } else {
-      // Add new team
-      await addDoc(collection(db, "teams"), {
-        name: teamName,
-        players: playerIds,
+    for (const playerId of selectedPlayerIds) {
+      await updateDoc(doc(db, "players", playerId), {
+        currentTeam: newTeamRef.id,
       });
     }
+
     setTeamName("");
-    setSelectedPlayers([]);
-    fetchTeams();
+    setSelectedPlayerIds([]);
+    setPlayerSearch("");
+    setShowModal(false);
+    fetchData();
   };
 
-  // Delete team
-  const deleteTeam = async (id) => {
-    if (
-      window.confirm(
-        "Are you sure you want to delete this team? This action cannot be undone."
-      )
-    ) {
-      await deleteDoc(doc(db, "teams", id));
-      if (editingId === id) {
-        setEditingId(null);
-        setTeamName("");
-        setSelectedPlayers([]);
-      }
-      fetchTeams();
-    }
+  const handleTogglePlayer = (playerId) => {
+    setSelectedPlayerIds((prev) =>
+      prev.includes(playerId)
+        ? prev.filter((id) => id !== playerId)
+        : [...prev, playerId]
+    );
   };
 
-  // Start editing a team
-  const startEditing = (team) => {
-    setEditingId(team.id);
-    setTeamName(team.name);
-    // Map player IDs to react-select format
-    const selected = team.players.map((pid) => {
-      const player = players.find((p) => p.id === pid);
-      return player ? { value: player.id, label: player.name } : null;
-    }).filter(Boolean);
-    setSelectedPlayers(selected);
-  };
-
-  // Cancel editing
-  const cancelEditing = () => {
-    setEditingId(null);
-    setTeamName("");
-    setSelectedPlayers([]);
-  };
-
-  const playerOptions = players.map((p) => ({
-    value: p.id,
-    label: p.name,
-  }));
+  // Filter players based on search input (case insensitive)
+  const filteredPlayers = players.filter((player) =>
+    player.gameName.toLowerCase().includes(playerSearch.toLowerCase())
+  );
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <h2 className="text-2xl mb-4">{editingId ? "Edit Team" : "Create Team"}</h2>
-      <form onSubmit={handleSubmit} className="space-y-4 mb-6">
-        <input
-          className="border p-2 rounded w-full"
-          placeholder="Team Name"
-          value={teamName}
-          onChange={(e) => setTeamName(e.target.value)}
-        />
-        <Select
-          isMulti
-          options={playerOptions}
-          value={selectedPlayers}
-          onChange={setSelectedPlayers}
-          placeholder="Select Players"
-        />
-        <div className="space-x-4">
-          <button
-            type="submit"
-            className={`px-4 py-2 rounded text-white ${
-              editingId ? "bg-yellow-600 hover:bg-yellow-700" : "bg-green-600 hover:bg-green-700"
-            }`}
-          >
-            {editingId ? "Save Changes" : "Create Team"}
-          </button>
-          {editingId && (
-            <button
-              type="button"
-              onClick={cancelEditing}
-              className="px-4 py-2 rounded bg-gray-400 hover:bg-gray-500 text-white"
-            >
-              Cancel
-            </button>
-          )}
-        </div>
-      </form>
+      <div className="flex justify-between items-center mb-6">
+        <h1 className="text-2xl font-bold">Teams</h1>
+        <button
+          onClick={() => setShowModal(true)}
+          className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+        >
+          Create Team
+        </button>
+      </div>
 
-      <h3 className="text-xl mb-3">Teams List</h3>
-      <ul className="space-y-3">
-        {teams.map((team) => (
-          <li
-            key={team.id}
-            className="border p-3 rounded flex justify-between items-center"
-          >
-            <div>
-              <strong>{team.name}</strong>
-              <p className="text-sm text-gray-600">
-                Players:{" "}
-                {team.players
-                  .map((pid) => players.find((p) => p.id === pid)?.name)
-                  .filter(Boolean)
-                  .join(", ") || "No players"}
+      {teams.length === 0 ? (
+        <p>No teams yet.</p>
+      ) : (
+        <div className="space-y-4">
+          {teams.map((team) => (
+            <div
+              key={team.id}
+              className="border rounded p-4 shadow-sm bg-white"
+            >
+              <div className="flex justify-between items-center mb-2">
+                <h2 className="text-lg font-semibold">{team.name}</h2>
+                <button
+                  onClick={() => handleDeleteTeam(team.id)}
+                  className="text-red-500 hover:text-red-700"
+                >
+                  Delete
+                </button>
+              </div>
+              <p className="text-sm text-gray-500 mb-2">
+                Players ({team.players?.length || 0}):
               </p>
+              <ul className="list-disc list-inside text-gray-800">
+                {team.players?.map((playerId) => {
+                  const player = playersMap[playerId];
+                  return (
+                    <li key={playerId}>
+                      {player?.gameName || "Unknown Player"}{" "}
+                      {player?.valorantCurrentRank
+                        ? `(${player.valorantCurrentRank})`
+                        : ""}
+                    </li>
+                  );
+                })}
+              </ul>
             </div>
-            <div className="space-x-2">
+          ))}
+        </div>
+      )}
+
+      {showModal && (
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-slate-900 p-6 rounded-md shadow-md w-full max-w-md text-white">
+            <h2 className="text-xl font-semibold mb-4">Create New Team</h2>
+            <input
+              type="text"
+              placeholder="Team name"
+              className="w-full border rounded px-3 py-2 mb-4 text-black"
+              value={teamName}
+              onChange={(e) => setTeamName(e.target.value)}
+            />
+
+            <input
+              type="text"
+              placeholder="Search players..."
+              className="w-full border rounded px-3 py-2 mb-2 text-black"
+              value={playerSearch}
+              onChange={(e) => setPlayerSearch(e.target.value)}
+            />
+
+            <div className="mb-4 max-h-48 overflow-y-auto border p-2 rounded">
+              <p className="font-medium mb-2 text-white">Select Players:</p>
+              {filteredPlayers.length === 0 ? (
+                <p className="text-gray-400">No players found.</p>
+              ) : (
+                filteredPlayers.map((player) => (
+                  <label
+                    key={player.id}
+                    className="block cursor-pointer select-none text-white"
+                  >
+                    <input
+                      type="checkbox"
+                      className="mr-2"
+                      checked={selectedPlayerIds.includes(player.id)}
+                      onChange={() => handleTogglePlayer(player.id)}
+                    />
+                    {player.gameName}{" "}
+                    {player.valorantCurrentRank && `(${player.valorantCurrentRank})`}
+                  </label>
+                ))
+              )}
+            </div>
+
+            {selectedPlayerIds.length > 0 && (
+              <div className="mb-4 border-t border-gray-700 pt-2">
+                <p className="font-semibold mb-2">Selected Players:</p>
+                <ul className="list-disc list-inside max-h-32 overflow-y-auto text-white">
+                  {selectedPlayerIds.map((id) => {
+                    const player = playersMap[id];
+                    return <li key={id}>{player?.gameName + " (" + player?.valorantCurrentRank + ")" || "Unknown Player"}</li>;
+                  })}
+                </ul>
+              </div>
+            )}
+
+            <div className="flex justify-end space-x-2">
               <button
-                onClick={() => startEditing(team)}
-                className="text-yellow-600 hover:text-yellow-800"
+                onClick={() => {
+                  setShowModal(false);
+                  setSelectedPlayerIds([]);
+                  setPlayerSearch("");
+                  setTeamName("");
+                }}
+                className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 text-black"
               >
-                Edit
+                Cancel
               </button>
               <button
-                onClick={() => deleteTeam(team.id)}
-                className="text-red-600 hover:text-red-800"
+                onClick={handleCreateTeam}
+                className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
+                disabled={!teamName.trim() || selectedPlayerIds.length === 0}
+                title={
+                  !teamName.trim()
+                    ? "Team name is required"
+                    : selectedPlayerIds.length === 0
+                    ? "Select at least one player"
+                    : ""
+                }
               >
-                Delete
+                Create
               </button>
             </div>
-          </li>
-        ))}
-      </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
