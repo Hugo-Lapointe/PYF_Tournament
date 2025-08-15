@@ -16,7 +16,10 @@ export default function AdminTeams() {
   const [showModal, setShowModal] = useState(false);
   const [teamName, setTeamName] = useState("");
   const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
-  const [playerSearch, setPlayerSearch] = useState(""); // <-- Search state
+  const [playerSearch, setPlayerSearch] = useState("");
+
+  // For editing
+  const [editingTeamId, setEditingTeamId] = useState(null);
 
   useEffect(() => {
     fetchData();
@@ -43,42 +46,80 @@ export default function AdminTeams() {
   };
 
   const handleDeleteTeam = async (teamId) => {
+    if (!window.confirm("Are you sure you want to delete this team?")) return;
+
     await deleteDoc(doc(db, "teams", teamId));
+
+    // Remove currentTeam reference from players
+    const team = teams.find((t) => t.id === teamId);
+    if (team?.players) {
+      for (const playerId of team.players) {
+        await updateDoc(doc(db, "players", playerId), { currentTeam: null });
+      }
+    }
+
     setTeams((prev) => prev.filter((team) => team.id !== teamId));
   };
 
-  const handleCreateTeam = async () => {
-    if (!teamName.trim()) return;
+  const handleCreateOrEditTeam = async () => {
+    if (!teamName.trim() || selectedPlayerIds.length === 0) return;
 
-    const teamData = {
-      name: teamName.trim(),
-      players: selectedPlayerIds,
-    };
+    if (editingTeamId) {
+      // Update existing team
+      const teamRef = doc(db, "teams", editingTeamId);
+      await updateDoc(teamRef, { name: teamName.trim(), players: selectedPlayerIds });
 
-    const newTeamRef = await addDoc(collection(db, "teams"), teamData);
+      // Update players' currentTeam
+      const prevTeam = teams.find((t) => t.id === editingTeamId);
+      const prevPlayerIds = prevTeam?.players || [];
 
-    for (const playerId of selectedPlayerIds) {
-      await updateDoc(doc(db, "players", playerId), {
-        currentTeam: newTeamRef.id,
-      });
+      // Remove previous team from players no longer in the team
+      for (const playerId of prevPlayerIds.filter((id) => !selectedPlayerIds.includes(id))) {
+        await updateDoc(doc(db, "players", playerId), { currentTeam: null });
+      }
+
+      // Add currentTeam to new players
+      for (const playerId of selectedPlayerIds) {
+        await updateDoc(doc(db, "players", playerId), { currentTeam: editingTeamId });
+      }
+    } else {
+      // Create new team
+      const teamData = {
+        name: teamName.trim(),
+        players: selectedPlayerIds,
+      };
+
+      const newTeamRef = await addDoc(collection(db, "teams"), teamData);
+
+      for (const playerId of selectedPlayerIds) {
+        await updateDoc(doc(db, "players", playerId), { currentTeam: newTeamRef.id });
+      }
     }
 
+    // Reset modal
     setTeamName("");
     setSelectedPlayerIds([]);
     setPlayerSearch("");
+    setEditingTeamId(null);
     setShowModal(false);
+
     fetchData();
   };
 
   const handleTogglePlayer = (playerId) => {
     setSelectedPlayerIds((prev) =>
-      prev.includes(playerId)
-        ? prev.filter((id) => id !== playerId)
-        : [...prev, playerId]
+      prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
     );
   };
 
-  // Filter players based on search input (case insensitive)
+  const handleEditTeam = (team) => {
+    setEditingTeamId(team.id);
+    setTeamName(team.name);
+    setSelectedPlayerIds(team.players || []);
+    setPlayerSearch("");
+    setShowModal(true);
+  };
+
   const filteredPlayers = players.filter((player) =>
     player.gameName.toLowerCase().includes(playerSearch.toLowerCase())
   );
@@ -100,18 +141,23 @@ export default function AdminTeams() {
       ) : (
         <div className="space-y-4">
           {teams.map((team) => (
-            <div
-              key={team.id}
-              className="border rounded p-4 shadow-sm bg-slate-800"
-            >
+            <div key={team.id} className="border rounded p-4 shadow-sm bg-slate-800">
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-semibold">{team.name}</h2>
-                <button
-                  onClick={() => handleDeleteTeam(team.id)}
-                  className="text-red-500 hover:text-red-700"
-                >
-                  Delete
-                </button>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={() => handleEditTeam(team)}
+                    className="text-yellow-400 hover:text-yellow-600"
+                  >
+                    Edit
+                  </button>
+                  <button
+                    onClick={() => handleDeleteTeam(team.id)}
+                    className="text-red-500 hover:text-red-700"
+                  >
+                    Delete
+                  </button>
+                </div>
               </div>
               <p className="text-sm text-gray-500 mb-2">
                 Players ({team.players?.length || 0}):
@@ -122,9 +168,7 @@ export default function AdminTeams() {
                   return (
                     <li key={playerId}>
                       {player?.gameName || "Unknown Player"}{" "}
-                      {player?.valorantCurrentRank
-                        ? `(${player.valorantCurrentRank})`
-                        : ""}
+                      {player?.valorantCurrentRank ? `(${player.valorantCurrentRank})` : ""}
                     </li>
                   );
                 })}
@@ -137,7 +181,9 @@ export default function AdminTeams() {
       {showModal && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
           <div className="bg-slate-900 p-6 rounded-md shadow-md w-full max-w-md text-white">
-            <h2 className="text-xl font-semibold mb-4">Create New Team</h2>
+            <h2 className="text-xl font-semibold mb-4">
+              {editingTeamId ? "Edit Team" : "Create New Team"}
+            </h2>
             <input
               type="text"
               placeholder="Team name"
@@ -183,7 +229,12 @@ export default function AdminTeams() {
                 <ul className="list-disc list-inside max-h-32 overflow-y-auto text-white">
                   {selectedPlayerIds.map((id) => {
                     const player = playersMap[id];
-                    return <li key={id}>{player?.gameName + " (" + player?.valorantCurrentRank + ")" || "Unknown Player"}</li>;
+                    return (
+                      <li key={id}>
+                        {player?.gameName + " (" + player?.valorantCurrentRank + ")" ||
+                          "Unknown Player"}
+                      </li>
+                    );
                   })}
                 </ul>
               </div>
@@ -196,13 +247,14 @@ export default function AdminTeams() {
                   setSelectedPlayerIds([]);
                   setPlayerSearch("");
                   setTeamName("");
+                  setEditingTeamId(null);
                 }}
                 className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 text-black"
               >
                 Cancel
               </button>
               <button
-                onClick={handleCreateTeam}
+                onClick={handleCreateOrEditTeam}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 disabled={!teamName.trim() || selectedPlayerIds.length === 0}
                 title={
@@ -213,7 +265,7 @@ export default function AdminTeams() {
                     : ""
                 }
               >
-                Create
+                {editingTeamId ? "Save Changes" : "Create"}
               </button>
             </div>
           </div>
