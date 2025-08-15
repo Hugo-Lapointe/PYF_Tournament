@@ -102,7 +102,7 @@ export default function AdminTeams() {
           {teams.map((team) => (
             <div
               key={team.id}
-              className="border rounded p-4 shadow-sm bg-white"
+              className="border rounded p-4 shadow-sm bg-slate-800"
             >
               <div className="flex justify-between items-center mb-2">
                 <h2 className="text-lg font-semibold">{team.name}</h2>
@@ -116,7 +116,7 @@ export default function AdminTeams() {
               <p className="text-sm text-gray-500 mb-2">
                 Players ({team.players?.length || 0}):
               </p>
-              <ul className="list-disc list-inside text-gray-800">
+              <ul className="list-disc list-inside text-white">
                 {team.players?.map((playerId) => {
                   const player = playersMap[playerId];
                   return (
@@ -141,7 +141,7 @@ export default function AdminTeams() {
             <input
               type="text"
               placeholder="Team name"
-              className="w-full border rounded px-3 py-2 mb-4 text-black"
+              className="w-full border rounded px-3 py-2 mb-4 text-white"
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
             />
@@ -149,7 +149,7 @@ export default function AdminTeams() {
             <input
               type="text"
               placeholder="Search players..."
-              className="w-full border rounded px-3 py-2 mb-2 text-black"
+              className="w-full border rounded px-3 py-2 mb-2 text-white"
               value={playerSearch}
               onChange={(e) => setPlayerSearch(e.target.value)}
             />

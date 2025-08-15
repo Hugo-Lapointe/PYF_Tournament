@@ -5,7 +5,7 @@ import { AnimatePresence } from "framer-motion";
 import Landing from "./pages/Landing";
 import Apply from "./pages/Apply";
 import Teams from "./pages/Teams";
-import Players from "./pages/Players";
+import PlayerDetails from "./pages/PlayerDetails";
 import Standings from "./pages/Standings";
 import Rules from "./pages/Rules";
 
@@ -31,7 +31,7 @@ function AnimatedRoutes() {
         <Route path="/" element={<Landing />} />
         <Route path="/apply" element={<Apply />} />
         <Route path="/teams" element={<Teams />} />
-        <Route path="/players" element={<Players />} />
+        <Route path="/players/:id" element={<PlayerDetails />} />
         <Route path="/standings" element={<Standings />} />
         <Route path="/rules" element={<Rules />} />
 

@@ -10,7 +10,7 @@ export default function Footer() {
           {/* Clickable logo image */}
           <Link to="/">
             <img
-              src="images/Logo_Pyf_transp.png" 
+              src="/images/Logo_full_transp.png" 
               alt="PYF Esports Logo"
               className="h-25 w-25 object-contain hover:opacity-80 transition"
             />
@@ -25,9 +25,6 @@ export default function Footer() {
           </Link>
           <Link to="/teams" className="hover:text-[#017bbd] transition-colors duration-300">
             Teams
-          </Link>
-          <Link to="/players" className="hover:text-[#017bbd] transition-colors duration-300">
-            Players
           </Link>
           <Link to="/standings" className="hover:text-[#017bbd] transition-colors duration-300">
             Tournaments

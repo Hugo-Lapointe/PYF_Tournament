@@ -9,6 +9,18 @@ const Standings = () => (
     transition={{ duration: 0.3 }}
   >
     <>Standings</>
+
+    <img
+              src="/images/round_robin.png"
+              alt="PYF Esports Logo"
+              className="h-100"
+    />
+
+    <img
+              src="/images/playoffs.png"
+              alt="PYF Esports Logo"
+              className="h-100"
+    />
   </motion.div>
 );
 
