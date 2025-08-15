@@ -15,10 +15,10 @@ export default function AdminTeams() {
   const [playersMap, setPlayersMap] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [teamName, setTeamName] = useState("");
+  const [logoFilename, setLogoFilename] = useState("");
   const [selectedPlayerIds, setSelectedPlayerIds] = useState([]);
+  const [captainId, setCaptainId] = useState(""); // New: captain
   const [playerSearch, setPlayerSearch] = useState("");
-
-  // For editing
   const [editingTeamId, setEditingTeamId] = useState(null);
 
   useEffect(() => {
@@ -47,10 +47,8 @@ export default function AdminTeams() {
 
   const handleDeleteTeam = async (teamId) => {
     if (!window.confirm("Are you sure you want to delete this team?")) return;
-
     await deleteDoc(doc(db, "teams", teamId));
 
-    // Remove currentTeam reference from players
     const team = teams.find((t) => t.id === teamId);
     if (team?.players) {
       for (const playerId of team.players) {
@@ -64,31 +62,28 @@ export default function AdminTeams() {
   const handleCreateOrEditTeam = async () => {
     if (!teamName.trim() || selectedPlayerIds.length === 0) return;
 
-    if (editingTeamId) {
-      // Update existing team
-      const teamRef = doc(db, "teams", editingTeamId);
-      await updateDoc(teamRef, { name: teamName.trim(), players: selectedPlayerIds });
+    const teamData = {
+      name: teamName.trim(),
+      players: selectedPlayerIds,
+      logoFilename: logoFilename.trim(),
+      captainId: captainId || null, // Save captain
+    };
 
-      // Update players' currentTeam
+    if (editingTeamId) {
+      const teamRef = doc(db, "teams", editingTeamId);
+      await updateDoc(teamRef, teamData);
+
       const prevTeam = teams.find((t) => t.id === editingTeamId);
       const prevPlayerIds = prevTeam?.players || [];
 
-      // Remove previous team from players no longer in the team
       for (const playerId of prevPlayerIds.filter((id) => !selectedPlayerIds.includes(id))) {
         await updateDoc(doc(db, "players", playerId), { currentTeam: null });
       }
 
-      // Add currentTeam to new players
       for (const playerId of selectedPlayerIds) {
         await updateDoc(doc(db, "players", playerId), { currentTeam: editingTeamId });
       }
     } else {
-      // Create new team
-      const teamData = {
-        name: teamName.trim(),
-        players: selectedPlayerIds,
-      };
-
       const newTeamRef = await addDoc(collection(db, "teams"), teamData);
 
       for (const playerId of selectedPlayerIds) {
@@ -96,9 +91,10 @@ export default function AdminTeams() {
       }
     }
 
-    // Reset modal
     setTeamName("");
+    setLogoFilename("");
     setSelectedPlayerIds([]);
+    setCaptainId("");
     setPlayerSearch("");
     setEditingTeamId(null);
     setShowModal(false);
@@ -108,14 +104,20 @@ export default function AdminTeams() {
 
   const handleTogglePlayer = (playerId) => {
     setSelectedPlayerIds((prev) =>
-      prev.includes(playerId) ? prev.filter((id) => id !== playerId) : [...prev, playerId]
+      prev.includes(playerId)
+        ? prev.filter((id) => id !== playerId)
+        : [...prev, playerId]
     );
+    // If deselecting captain, clear captainId
+    if (playerId === captainId) setCaptainId("");
   };
 
   const handleEditTeam = (team) => {
     setEditingTeamId(team.id);
     setTeamName(team.name);
+    setLogoFilename(team.logoFilename || "");
     setSelectedPlayerIds(team.players || []);
+    setCaptainId(team.captainId || "");
     setPlayerSearch("");
     setShowModal(true);
   };
@@ -142,8 +144,17 @@ export default function AdminTeams() {
         <div className="space-y-4">
           {teams.map((team) => (
             <div key={team.id} className="border rounded p-4 shadow-sm bg-slate-800">
-              <div className="flex justify-between items-center mb-2">
-                <h2 className="text-lg font-semibold">{team.name}</h2>
+              <div className="flex items-center justify-between mb-2">
+                <div className="flex items-center space-x-4">
+                  {team.logoFilename && (
+                    <img
+                      src={`/images/team-logos/${team.logoFilename}`}
+                      alt={team.name}
+                      className="w-12 h-12 object-contain"
+                    />
+                  )}
+                  <h2 className="text-lg font-semibold">{team.name}</h2>
+                </div>
                 <div className="flex space-x-2">
                   <button
                     onClick={() => handleEditTeam(team)}
@@ -169,6 +180,7 @@ export default function AdminTeams() {
                     <li key={playerId}>
                       {player?.gameName || "Unknown Player"}{" "}
                       {player?.valorantCurrentRank ? `(${player.valorantCurrentRank})` : ""}
+                      {playerId === team.captainId ? " (Captain)" : ""}
                     </li>
                   );
                 })}
@@ -191,7 +203,13 @@ export default function AdminTeams() {
               value={teamName}
               onChange={(e) => setTeamName(e.target.value)}
             />
-
+            <input
+              type="text"
+              placeholder="Logo filename (e.g., team1.png)"
+              className="w-full border rounded px-3 py-2 mb-4 text-white"
+              value={logoFilename}
+              onChange={(e) => setLogoFilename(e.target.value)}
+            />
             <input
               type="text"
               placeholder="Search players..."
@@ -224,6 +242,27 @@ export default function AdminTeams() {
             </div>
 
             {selectedPlayerIds.length > 0 && (
+              <div className="mb-4">
+                <p className="font-medium mb-2 text-white">Select Captain:</p>
+                <select
+                  className="w-full border rounded px-3 py-2 text-white bg-slate-700"
+                  value={captainId}
+                  onChange={(e) => setCaptainId(e.target.value)}
+                >
+                  <option value="">-- None --</option>
+                  {selectedPlayerIds.map((id) => {
+                    const player = playersMap[id];
+                    return (
+                      <option key={id} value={id}>
+                        {player?.gameName || "Unknown Player"}
+                      </option>
+                    );
+                  })}
+                </select>
+              </div>
+            )}
+
+            {selectedPlayerIds.length > 0 && (
               <div className="mb-4 border-t border-gray-700 pt-2">
                 <p className="font-semibold mb-2">Selected Players:</p>
                 <ul className="list-disc list-inside max-h-32 overflow-y-auto text-white">
@@ -233,6 +272,7 @@ export default function AdminTeams() {
                       <li key={id}>
                         {player?.gameName + " (" + player?.valorantCurrentRank + ")" ||
                           "Unknown Player"}
+                        {id === captainId ? " (Captain)" : ""}
                       </li>
                     );
                   })}
@@ -245,8 +285,10 @@ export default function AdminTeams() {
                 onClick={() => {
                   setShowModal(false);
                   setSelectedPlayerIds([]);
+                  setCaptainId("");
                   setPlayerSearch("");
                   setTeamName("");
+                  setLogoFilename("");
                   setEditingTeamId(null);
                 }}
                 className="bg-gray-300 px-4 py-2 rounded hover:bg-gray-400 text-black"
@@ -257,13 +299,6 @@ export default function AdminTeams() {
                 onClick={handleCreateOrEditTeam}
                 className="bg-blue-600 text-white px-4 py-2 rounded hover:bg-blue-700"
                 disabled={!teamName.trim() || selectedPlayerIds.length === 0}
-                title={
-                  !teamName.trim()
-                    ? "Team name is required"
-                    : selectedPlayerIds.length === 0
-                    ? "Select at least one player"
-                    : ""
-                }
               >
                 {editingTeamId ? "Save Changes" : "Create"}
               </button>
