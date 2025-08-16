@@ -20,9 +20,6 @@ export default function Footer() {
 
         {/* Right side: Navigation links */}
         <nav className="flex flex-wrap gap-4 text-sm md:text-base">
-          <Link to="/apply" className="hover:text-[#017bbd] transition-colors duration-300">
-            Apply
-          </Link>
           <Link to="/teams" className="hover:text-[#017bbd] transition-colors duration-300">
             Teams
           </Link>

@@ -43,11 +43,6 @@ const Navbar = () => {
                 Landing
               </li>
             </Link>
-            <Link to="/apply" onClick={closeMobileMenu}>
-              <li className="my-4 py-4 hover:bg-slate-800 transition-colors duration-200">
-                Apply
-              </li>
-            </Link>
             <Link to="/teams" onClick={closeMobileMenu}>
               <li className="my-4 py-4 hover:bg-slate-800 transition-colors duration-200">
                 Teams
@@ -60,7 +55,12 @@ const Navbar = () => {
             </Link>
             <Link to="/standings" onClick={closeMobileMenu}>
               <li className="my-4 py-4 hover:bg-slate-800 transition-colors duration-200">
-                Tournaments
+                Schedule
+              </li>
+            </Link>
+            <Link to="/results" onClick={closeMobileMenu}>
+              <li className="my-4 py-4 hover:bg-slate-800 transition-colors duration-200">
+                Results
               </li>
             </Link>
             {/* {user && (
@@ -94,14 +94,14 @@ const Navbar = () => {
             <Link to="/">
               <li className="hover:text-[#017bbd] transition-colors duration-300">Landing</li>
             </Link>
-            <Link to="/apply">
-              <li className="hover:text-[#017bbd] transition-colors duration-300">Apply</li>
-            </Link>
             <Link to="/teams">
               <li className="hover:text-[#017bbd] transition-colors duration-300">Teams</li>
             </Link>
             <Link to="/standings">
-              <li className="hover:text-[#017bbd] transition-colors duration-300">Tournaments</li>
+              <li className="hover:text-[#017bbd] transition-colors duration-300">Schedule</li>
+            </Link>
+            <Link to="/results">
+              <li className="hover:text-[#017bbd] transition-colors duration-300">Results</li>
             </Link>
             {/* {user && <li><LogoutButton /></li>} */}
           </ul>

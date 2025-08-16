@@ -112,7 +112,7 @@ export default function Teams() {
                         <Link
                           key={player.id}
                           to={`/players/${player.id}`}
-                          className="flex flex-col items-center gap-2 text-white hover:text-gray-300 no-underline"
+                          className="flex flex-col items-center gap-2 text-white hover:text-gray-300 no-underline secondary"
                         >
                           {player.imageFilename ? (
                             <img

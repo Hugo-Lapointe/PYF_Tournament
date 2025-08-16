@@ -7,6 +7,7 @@ import Apply from "./pages/Apply";
 import Teams from "./pages/Teams";
 import PlayerDetails from "./pages/PlayerDetails";
 import Standings from "./pages/Standings";
+import Results from "./pages/Results";
 import Rules from "./pages/Rules";
 
 import AdminLogin from "./pages/AdminLogin";
@@ -33,6 +34,7 @@ function AnimatedRoutes() {
         <Route path="/teams" element={<Teams />} />
         <Route path="/players/:id" element={<PlayerDetails />} />
         <Route path="/standings" element={<Standings />} />
+        <Route path="/results" element={<Results />} />
         <Route path="/rules" element={<Rules />} />
 
         {/* Admin login */}

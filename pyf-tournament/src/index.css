@@ -4,12 +4,27 @@
 @import "tailwindcss";
 
 
+@font-face {
+  font-family: 'Bubblegum';
+  src: url('./assets/fonts/Bubblegum.ttf') format('truetype');
+}
+
+@font-face {
+  font-family: 'Sunrise';
+  src: url('./assets/fonts/Cute\ Sunrise.otf') format('truetype');
+}
+
 :root {
     color: white;
+    font-family: 'Bubblegum', sans-serif;
 }
 
 a {
   color: white;
+}
+
+.secondary {
+  font-family: 'Sunrise', sans-serif;
 }
 
 @media (max-width: 640px) {

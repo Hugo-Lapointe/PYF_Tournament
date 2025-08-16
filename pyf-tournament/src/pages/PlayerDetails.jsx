@@ -82,14 +82,11 @@ export default function PlayerDetails() {
           </h1>
 
           <p className="text-lg">
-            <strong>Current Team:</strong>{" "}
+            <strong>Current Team: </strong> 
             {team ? (
-              <Link
-                to={`/teams/${player.currentTeam}`}
-                className="text-blue-400 hover:underline"
-              >
+              <span>
                 {team.name}
-              </Link>
+              </span>
             ) : (
               "N/A"
             )}

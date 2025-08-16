@@ -15,7 +15,7 @@ export default function Rules() {
         </h1>
 
         <div className="w-full max-w-3xl space-y-8">
-            <Section title="1️⃣ General Conduct">
+            <Section title="General Conduct">
             <List items={[
                 "Be cool. Respect players and staff.",
                 "Trash talk is fine, but keep it fun — no racism, harassment, or hate speech.",
@@ -23,7 +23,7 @@ export default function Rules() {
             ]} />
             </Section>
 
-            <Section title="2️⃣ Participation Rules">
+            <Section title="Participation Rules">
             <List items={[
                 "Show up on time for your matches — late = forfeit.",
                 "Follow all instructions from staff and referees.",
@@ -31,7 +31,7 @@ export default function Rules() {
             ]} />
             </Section>
 
-            <Section title="3️⃣ Penalties">
+            <Section title="Penalties">
             <List items={[
                 "Late to match: Forfeit the round or match.",
                 "Toxic behavior or harassment: Warning → DQ if it keeps up.",
@@ -39,7 +39,7 @@ export default function Rules() {
             ]} />
             </Section>
 
-            <Section title="🏆 Tournament Overview">
+            <Section title="Tournament Overview">
             <p className="mb-4">
                 Format: Round Robin → Single-Elimination Playoffs
             </p>
@@ -67,7 +67,7 @@ export default function Rules() {
             </p>
             </Section>
 
-            <Section title="🗺 Map Pool & Selection">
+            <Section title="Map Pool & Selection">
             <p className="mb-4">
                 All current Valorant maps are in play.
             </p>
@@ -79,7 +79,7 @@ export default function Rules() {
             ]} />
             </Section>
 
-            <Section title="🎮 Match Procedures">
+            <Section title="Match Procedures">
             <p className="font-semibold mb-2">Check-In:</p>
             <List items={[
                 "Team captains must check in 15 minutes before their match in ⁠check-in.",

@@ -11,7 +11,7 @@ export default function Schedule() {
       transition={{ duration: 0.3 }}
     >
       <h1 className="text-4xl font-bold text-center text-white mb-12">
-        Tournament Schedule
+        Schedule
       </h1>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
